@@ -45,6 +45,54 @@ class Mage(Entity):
     pass
 
 
+class Player(Entity):
+    def __init__(self, spawn_coordinates):
+        super().__init__(spawn_coordinates)
+        self.image = pygame.image.load("sprites/male1.png")
+        self.image = pygame.transform.scale(self.image, (self.image.get_width() * 16, self.image.get_height() * 16))
+        self.rect = self.image.get_rect(center=spawn_coordinates)
+        self.moving_direction = pygame.math.Vector2()
+        self.speed = 1000
+        self.facing_right = True
+
+    def process_input(self):
+        pressed_keys = pygame.key.get_pressed()
+        if pressed_keys[pygame.K_d]:
+            self.moving_direction.x = 1
+        if pressed_keys[pygame.K_a]:
+            self.moving_direction.x = -1
+        if pressed_keys[pygame.K_s]:
+            self.moving_direction.y = 1
+        if pressed_keys[pygame.K_w]:
+            self.moving_direction.y = -1
+
+        if self.moving_direction:
+            self.moving_direction = self.moving_direction.normalize()
+        # print(self.moving_direction)
+    
+    def update(self, frame_time_s):
+
+        if self.moving_direction.x > 0:
+            if self.facing_right is not True:
+                self.facing_right = True
+                self.image = pygame.transform.flip(self.image, True, False)
+                print("Changed to right")
+        elif self.moving_direction.x < 0:
+            if self.facing_right is not False:
+                self.facing_right = False
+                self.image = pygame.transform.flip(self.image, True, False)
+                print("Changed to left")
+
+        move_vector = self.moving_direction * self.speed * frame_time_s
+        self.coordinates += move_vector
+        self.rect.center = self.coordinates
+        self.moving_direction = pygame.math.Vector2()
+        # print(self.rect.center)
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
+
 if __name__ == "__main__":
     mob1 = Mage((40, 50))
     mob1.move(Vector(-10, 50))
